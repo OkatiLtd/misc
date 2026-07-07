@@ -243,7 +243,7 @@
 <main>
   <div class="stage" id="stage">
     <div class="zoomwrap" id="zoomwrap">
-      <div class="flipbook" id="book"></div>
+      <div id="bookHost"><div class="flipbook" id="book"></div></div>
     </div>
     <div class="loading" id="loading">
       <div class="spinner"></div>
@@ -268,7 +268,8 @@
 
     <button class="nav" id="next" title="Next page (→)"><b class="hide-sm">Next</b><span class="icon">›</span></button>
 
-    <button id="zoom" title="Zoom (+ / −)"><span class="icon">⊕</span><span class="hide-sm">Zoom</span></button>
+    <button id="zoomOut" title="Zoom out (−)" disabled><span class="icon">⊖</span></button>
+    <button id="zoomIn" title="Zoom in (+)"><span class="icon">⊕</span></button>
     <button id="fs" title="Fullscreen (F)" class="hide-sm"><span class="icon">⤢</span></button>
   </div>
 
@@ -276,7 +277,7 @@
     <span>Provided as a convenience — not a product of Okati&nbsp;Ltd.</span>
     <button class="linkish" id="aboutBtn">About &amp; disclaimer</button>
     <span class="sep">·</span>
-    <a class="okati" href="https://okati.co.uk" target="_blank" rel="noopener noreferrer">okati.co.uk</a>
+    <a class="okati" href="https://www.okati.co.uk" target="_blank" rel="noopener noreferrer">okati.co.uk</a>
   </div>
 </footer>
 
@@ -288,7 +289,7 @@
     <p>This is a digital, page-through edition of <em>The Centenary History of the Home Park Golf Club</em> by J. G. C. Pope, made from a scan of the printed book.</p>
     <p>It is provided purely as a convenience for readers. It is <strong>not</strong> a product of, and is not published, endorsed, sponsored, or maintained by Okati&nbsp;Ltd or any person associated with it.</p>
     <p class="fine">All text and images remain the copyright of their respective owners; no ownership of, or rights in, the original work are claimed by whoever hosts this edition. It is made available for personal, non-commercial reading only, and is provided “as is”, without warranty of any kind. Some pages present in the printed book may be absent from the scan. If you hold rights in this work and would like this edition amended or removed, please get in touch.</p>
-    <p class="okati-row"><a href="https://okati.co.uk" target="_blank" rel="noopener noreferrer">okati.co.uk</a></p>
+    <p class="okati-row"><a href="https://www.okati.co.uk" target="_blank" rel="noopener noreferrer">okati.co.uk</a></p>
   </div>
 </div>
 
@@ -318,6 +319,12 @@
   function src(n){ return "pages/page-" + String(n).padStart(PAD,"0") + ".jpg"; }
   var IMAGES = [];
   for (var i=1;i<=TOTAL;i++) IMAGES.push(src(i));
+
+  // Remember the reader's place on their own device (not a cookie, not sent
+  // anywhere). Stored as the current 0-based page index.
+  var LAST_KEY = "hpgc-last-leaf-v1";
+  function saveLast(){ try { localStorage.setItem(LAST_KEY, String(pageFlip.getCurrentPageIndex())); } catch(e){} }
+  function readLast(){ try { var v = parseInt(localStorage.getItem(LAST_KEY), 10); return isNaN(v) ? null : v; } catch(e){ return null; } }
 
   // Reliable leaf<->printed-page map: for the paired-spread range,
   // leaf = printed_page - 4 (verified). Back matter pinned by inspection.
@@ -389,10 +396,12 @@
   }
 
   function makeFlip(portrait){
+    var host = document.getElementById("bookHost");
+    host.innerHTML = "";                 // clear any previous instance's DOM
     var el = document.createElement("div");
     el.className = "flipbook";
     el.id = "book";
-    bookEl.replaceWith(el);
+    host.appendChild(el);                // host is permanent -> book is always attached
     bookEl = el;
 
     var sz = computeSize(portrait);
@@ -440,6 +449,7 @@
     slider.style.setProperty("--fill", ((left-1)/Math.max(1,total-1))*100 + "%");
     prev.disabled = (left <= 1);
     next.disabled = (left >= total);
+    saveLast();
   }
 
   function goTo(leaf){                                // leaf is 1-based
@@ -452,6 +462,11 @@
   pageFlip = makeFlip(wantPortrait);
   lastKey = sizeKey();
   pageFlip.on("init", function(){
+    var saved = readLast();
+    if (saved != null){
+      saved = Math.max(0, Math.min(saved, pageFlip.getPageCount() - 1));
+      if (saved > 0) pageFlip.turnToPage(saved);
+    }
     refresh();
     loading.classList.add("gone");
     setTimeout(function(){ loading.style.display = "none"; }, 450);
@@ -460,10 +475,15 @@
   // Refit on resize (debounced): rebuild when the fitted size or orientation
   // changes, keeping the reader on the same leaf. Images are cached, so the
   // rebuild is quick.
-  var rzTimer = null;
+  var rzTimer = null, lastDPR = window.devicePixelRatio;
   window.addEventListener("resize", function(){
     clearTimeout(rzTimer);
     rzTimer = setTimeout(function(){
+      // Browser zoom (Cmd/Ctrl +/-) changes devicePixelRatio: let the browser
+      // scale the fixed-size book instead of rebuilding it (rebuilding on zoom
+      // was blanking the book out).
+      var dpr = window.devicePixelRatio;
+      if (dpr !== lastDPR){ lastDPR = dpr; lastKey = sizeKey(); return; }
       var key = sizeKey();
       if (key !== lastKey){
         lastKey = key;
@@ -501,24 +521,26 @@
   // ---- Zoom --------------------------------------------------------------
   var stage = document.getElementById("stage");
   var zoomwrap = document.getElementById("zoomwrap");
-  var zoomBtn = document.getElementById("zoom");
-  var levels = [1, 1.5, 2], zi = 0;
+  var zoomOutBtn = document.getElementById("zoomOut");
+  var zoomInBtn = document.getElementById("zoomIn");
+  var levels = [1, 1.5, 2, 2.5], zi = 0;
   function applyZoom(){
     var z = levels[zi];
     zoomwrap.style.transform = "scale(" + z + ")";
     stage.style.alignItems = z>1 ? "flex-start" : "center";
     stage.style.justifyContent = z>1 ? "flex-start" : "center";
-    zoomBtn.querySelector(".icon").textContent = z>1 ? "⊖" : "⊕";
+    zoomOutBtn.disabled = (zi === 0);
+    zoomInBtn.disabled = (zi === levels.length - 1);
     if (z>1){ stage.scrollLeft=(stage.scrollWidth-stage.clientWidth)/2; stage.scrollTop=(stage.scrollHeight-stage.clientHeight)/2; }
   }
   function cycleZoom(dir){
-    if (dir==="out") zi=Math.max(0,zi-1);
-    else if (dir==="in") zi=Math.min(levels.length-1,zi+1);
-    else zi=(zi+1)%levels.length;
+    if (dir==="out") zi=Math.max(0, zi-1);
+    else zi=Math.min(levels.length-1, zi+1);
     applyZoom();
   }
-  zoomBtn.addEventListener("click", function(){ cycleZoom(); });
-  bookEl.addEventListener("dblclick", function(){ cycleZoom(); });
+  zoomOutBtn.addEventListener("click", function(){ cycleZoom("out"); });
+  zoomInBtn.addEventListener("click", function(){ cycleZoom("in"); });
+  stage.addEventListener("dblclick", function(){ zi = zi>0 ? 0 : 1; applyZoom(); });
 
   // ---- Fullscreen --------------------------------------------------------
   var fsBtn = document.getElementById("fs");
