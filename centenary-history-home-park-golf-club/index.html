@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Centenary History of the Home Park Golf Club · 1895–1995</title>
+<meta name="description" content="A page-through edition of J. G. C. Pope's Centenary History of the Home Park Golf Club, Hampton Court.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2316281d'/%3E%3Ccircle cx='16' cy='16' r='8.5' fill='none' stroke='%23bd9350' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23bd9350'/%3E%3C/svg%3E">
+<style>
+  :root{
+    /* Parkland-dusk greens drawn from the club's world; brass + off-white from the crest */
+    --ink:        #0e1e15;   /* deepest green, page gutter */
+    --green:      #16281d;   /* chrome base */
+    --green-2:    #1d3627;   /* raised chrome */
+    --brass:      #bd9350;   /* antique brass accent (crest horseshoe) */
+    --brass-dim:  #8f7040;
+    --paper:      #f4f1e8;   /* off-white paper */
+    --cream:      #ece5d5;   /* chrome text */
+    --cream-dim:  #9fae9c;   /* muted labels */
+    --hair:       rgba(189,147,80,.34);
+    --shadow:     rgba(0,0,0,.55);
+    --serif: "Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,"Times New Roman",serif;
+    --sans:  ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--cream); font-family:var(--sans);
+    background:
+      radial-gradient(120% 90% at 50% 6%, #22402d 0%, var(--green) 46%, var(--ink) 100%) fixed;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    display:flex; flex-direction:column; min-height:100dvh; overflow:hidden;
+  }
+
+  /* ---------- Masthead ---------- */
+  header{
+    flex:0 0 auto; text-align:center; padding:14px 16px 10px;
+    border-bottom:1px solid var(--hair);
+    background:linear-gradient(180deg, rgba(0,0,0,.14), transparent);
+  }
+  .motto{
+    font-family:var(--sans); font-size:11px; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--brass); margin:0 0 6px; padding-left:.42em;
+  }
+  h1{
+    font-family:var(--serif); font-weight:600; letter-spacing:.01em;
+    font-size:clamp(16px,2.5vw,23px); line-height:1.15; margin:0; color:var(--paper);
+  }
+  h1 .of{ color:var(--cream-dim); font-style:italic; font-weight:500; }
+  .dates{
+    margin-top:7px; font-family:var(--serif); font-size:12.5px; letter-spacing:.34em;
+    color:var(--brass); padding-left:.34em;
+  }
+  .dates .dot{ color:var(--brass-dim); }
+
+  /* ---------- Stage ---------- */
+  main{
+    flex:1 1 auto; position:relative; min-height:0;
+    display:flex; align-items:center; justify-content:center;
+    padding:18px 12px;
+  }
+  .stage{
+    position:relative; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    overflow:auto; overscroll-behavior:contain;
+  }
+  .zoomwrap{
+    transform-origin:center center; transition:transform .28s ease;
+    will-change:transform; display:flex; align-items:center; justify-content:center;
+  }
+  .flipbook{
+    filter:drop-shadow(0 22px 34px var(--shadow)) drop-shadow(0 4px 8px rgba(0,0,0,.4));
+  }
+  /* faint page edge + centre gutter for a bound-book feel */
+  .flipbook .stf__item{ background:var(--paper); }
+  .flipbook .--left{ box-shadow: inset -14px 0 24px -18px rgba(0,0,0,.55); }
+  .flipbook .--right{ box-shadow: inset 14px 0 24px -18px rgba(0,0,0,.55); }
+
+  .loading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:14px; color:var(--cream-dim); pointer-events:none;
+    transition:opacity .4s ease;
+  }
+  .loading.gone{ opacity:0; }
+  .spinner{
+    width:30px;height:30px;border-radius:50%;
+    border:2px solid var(--hair); border-top-color:var(--brass);
+    animation:spin .9s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading small{ font-family:var(--serif); font-style:italic; letter-spacing:.02em; }
+
+  /* ---------- Control rail ---------- */
+  footer{
+    flex:0 0 auto; border-top:1px solid var(--hair);
+    background:linear-gradient(0deg, rgba(0,0,0,.20), transparent);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  }
+  .rail{
+    max-width:1000px; margin:0 auto; display:flex; align-items:center; gap:10px;
+  }
+  .scrub{ flex:1 1 auto; display:flex; align-items:center; gap:12px; min-width:0; }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:3px; border-radius:2px;
+    background:linear-gradient(90deg,var(--brass) 0 var(--fill,0%), var(--hair) var(--fill,0%) 100%);
+    outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:15px;height:15px;border-radius:50%;
+    background:var(--paper); border:2px solid var(--brass); cursor:grab; margin-top:-1px;
+    box-shadow:0 1px 3px rgba(0,0,0,.5);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;background:var(--paper);
+    border:2px solid var(--brass); cursor:grab;
+  }
+  .count{
+    font-family:var(--serif); font-size:13px; color:var(--cream-dim);
+    white-space:nowrap; min-width:74px; text-align:right; font-variant-numeric:tabular-nums;
+  }
+  .count b{ color:var(--paper); font-weight:600; }
+
+  button, .menu > summary{
+    font-family:var(--sans); font-size:13px; color:var(--cream);
+    background:var(--green-2); border:1px solid var(--hair); border-radius:9px;
+    padding:8px 11px; cursor:pointer; line-height:1; user-select:none;
+    display:inline-flex; align-items:center; gap:6px; transition:border-color .15s, background .15s, color .15s;
+  }
+  button:hover, .menu > summary:hover{ border-color:var(--brass); color:var(--paper); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible, .menu > summary:focus-visible, input:focus-visible{
+    outline:2px solid var(--brass); outline-offset:2px;
+  }
+  button:disabled{ opacity:.38; cursor:default; }
+  .icon{ font-size:15px; line-height:1; }
+  .nav b{ font-weight:600; }
+  .hide-sm{}
+
+  /* ---------- Contents menu ---------- */
+  .menu{ position:relative; }
+  .menu[open] > summary{ border-color:var(--brass); color:var(--paper); }
+  .menu > summary{ list-style:none; }
+  .menu > summary::-webkit-details-marker{ display:none; }
+  .sheet{
+    position:absolute; bottom:calc(100% + 10px); left:0; z-index:30;
+    width:280px; max-height:56vh; overflow:auto;
+    background:var(--green-2); border:1px solid var(--hair); border-radius:12px;
+    box-shadow:0 18px 40px var(--shadow); padding:6px;
+  }
+  .sheet h2{
+    font-family:var(--sans); font-size:10.5px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--brass); margin:8px 10px 4px;
+  }
+  .sheet a{
+    display:flex; justify-content:space-between; gap:10px; align-items:baseline;
+    padding:8px 10px; border-radius:8px; text-decoration:none; color:var(--cream);
+    font-family:var(--serif); font-size:14px; cursor:pointer;
+  }
+  .sheet a:hover{ background:rgba(189,147,80,.14); color:var(--paper); }
+  .sheet a .pg{ font-family:var(--sans); font-size:11px; color:var(--cream-dim); font-variant-numeric:tabular-nums; }
+  .sheet hr{ border:none; border-top:1px solid var(--hair); margin:6px 8px; }
+
+  /* ---------- Discreet sub-footer + colophon ---------- */
+  .subfoot{
+    max-width:1000px; margin:8px auto 0; text-align:center;
+    font-family:var(--sans); font-size:11px; letter-spacing:.02em; color:var(--cream-dim);
+    display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap; line-height:1.4;
+  }
+  .subfoot .sep{ color:var(--brass-dim); }
+  .linkish{
+    background:none; border:none; padding:0; margin:0; cursor:pointer;
+    font:inherit; color:var(--cream-dim); text-decoration:underline; text-underline-offset:2px;
+    text-decoration-color:var(--hair); border-radius:2px;
+  }
+  .linkish:hover{ color:var(--paper); text-decoration-color:var(--brass); }
+  a.okati{
+    color:var(--brass); text-decoration:none; letter-spacing:.06em;
+    border-bottom:1px solid var(--hair); padding-bottom:1px; transition:border-color .15s,color .15s;
+  }
+  a.okati:hover{ color:var(--paper); border-color:var(--brass); }
+
+  /* ---------- About / disclaimer overlay ---------- */
+  .about-overlay{
+    position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center;
+    background:rgba(6,14,10,.66); backdrop-filter:blur(2px); padding:20px;
+    animation:fade .2s ease;
+  }
+  .about-overlay[hidden]{ display:none; }
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .about-card{
+    position:relative; width:min(560px,94vw); max-height:84vh; overflow:auto;
+    background:var(--green-2); border:1px solid var(--hair); border-radius:14px;
+    box-shadow:0 30px 60px var(--shadow); padding:26px 26px 22px; color:var(--cream);
+  }
+  .about-card h2{
+    font-family:var(--serif); font-weight:600; color:var(--paper);
+    font-size:19px; margin:0 0 4px;
+  }
+  .about-card .kicker{
+    font-family:var(--sans); font-size:10.5px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--brass); margin:0 0 14px;
+  }
+  .about-card p{ font-family:var(--serif); font-size:14.5px; line-height:1.58; margin:0 0 12px; color:var(--cream); }
+  .about-card p.fine{ font-size:12.5px; color:var(--cream-dim); }
+  .about-card a{ color:var(--brass); }
+  .about-card .okati-row{ margin-top:16px; padding-top:14px; border-top:1px solid var(--hair); text-align:center; }
+  .about-card .okati-row a{
+    font-family:var(--sans); letter-spacing:.08em; font-size:14px; text-decoration:none;
+    color:var(--brass); border-bottom:1px solid var(--hair); padding-bottom:2px;
+  }
+  .about-card .okati-row a:hover{ color:var(--paper); border-color:var(--brass); }
+  .about-close{
+    position:absolute; top:12px; right:12px; width:32px; height:32px; padding:0;
+    border-radius:8px; font-size:18px; line-height:1; color:var(--cream-dim);
+    background:transparent; border:1px solid var(--hair);
+  }
+  .about-close:hover{ color:var(--paper); border-color:var(--brass); }
+
+  @media (max-width:640px){
+    .hide-sm{ display:none !important; }
+    .count{ min-width:60px; font-size:12px; }
+    header{ padding-top:10px; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .zoomwrap{ transition:none; }
+  }
+</style>
+<!-- ─────────────────────────────────────────────────────────────
+     GoatCounter analytics (privacy-friendly). Counts one visit per
+     page load. Dashboard: https://hcpgc-book.goatcounter.com
+     ───────────────────────────────────────────────────────────── -->
+<script data-goatcounter="https://hcpgc-book.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<header>
+  <p class="motto">Non&nbsp;Quo&nbsp;Sed&nbsp;Quomodo</p>
+  <h1>The Centenary History <span class="of">of the</span> Home Park Golf Club</h1>
+  <div class="dates">1895&nbsp;&nbsp;<span class="dot">·</span>&nbsp;&nbsp;1995</div>
+</header>
+
+<main>
+  <div class="stage" id="stage">
+    <div class="zoomwrap" id="zoomwrap">
+      <div class="flipbook" id="book"></div>
+    </div>
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <small>Opening the book…</small>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="rail">
+    <details class="menu" id="menu">
+      <summary title="Contents"><span class="icon">☰</span><span class="hide-sm">Contents</span></summary>
+      <div class="sheet" id="sheet"><!-- filled by JS --></div>
+    </details>
+
+    <button class="nav" id="prev" title="Previous page (←)"><span class="icon">‹</span><b class="hide-sm">Prev</b></button>
+
+    <div class="scrub">
+      <input type="range" id="slider" min="1" max="1" value="1" step="1" aria-label="Jump to page">
+      <span class="count"><b id="cur">1</b> / <span id="total">–</span></span>
+    </div>
+
+    <button class="nav" id="next" title="Next page (→)"><b class="hide-sm">Next</b><span class="icon">›</span></button>
+
+    <button id="zoom" title="Zoom (+ / −)"><span class="icon">⊕</span><span class="hide-sm">Zoom</span></button>
+    <button id="fs" title="Fullscreen (F)" class="hide-sm"><span class="icon">⤢</span></button>
+  </div>
+
+  <div class="subfoot">
+    <span>Provided as a convenience — not a product of Okati&nbsp;Ltd.</span>
+    <button class="linkish" id="aboutBtn">About &amp; disclaimer</button>
+    <span class="sep">·</span>
+    <a class="okati" href="https://okati.co.uk" target="_blank" rel="noopener noreferrer">okati.co.uk</a>
+  </div>
+</footer>
+
+<div class="about-overlay" id="aboutOverlay" hidden>
+  <div class="about-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <button class="about-close" id="aboutClose" aria-label="Close">×</button>
+    <p class="kicker">Home Park Golf Club · 1895–1995</p>
+    <h2 id="aboutTitle">About this edition</h2>
+    <p>This is a digital, page-through edition of <em>The Centenary History of the Home Park Golf Club</em> by J. G. C. Pope, made from a scan of the printed book.</p>
+    <p>It is provided purely as a convenience for readers. It is <strong>not</strong> a product of, and is not published, endorsed, sponsored, or maintained by Okati&nbsp;Ltd or any person associated with it.</p>
+    <p class="fine">All text and images remain the copyright of their respective owners; no ownership of, or rights in, the original work are claimed by whoever hosts this edition. It is made available for personal, non-commercial reading only, and is provided “as is”, without warranty of any kind. Some pages present in the printed book may be absent from the scan. If you hold rights in this work and would like this edition amended or removed, please get in touch.</p>
+    <p class="okati-row"><a href="https://okati.co.uk" target="_blank" rel="noopener noreferrer">okati.co.uk</a></p>
+  </div>
+</div>
+
+<script src="lib/page-flip.browser.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // If the page-turn library didn't load (e.g. index.html was opened on its
+  // own, away from its lib/ and pages/ folders), explain it rather than crash.
+  if (typeof St === "undefined" || !St || !St.PageFlip){
+    var l = document.getElementById("loading");
+    if (l){
+      l.classList.remove("gone"); l.style.display = "flex";
+      l.innerHTML =
+        '<div style="max-width:38ch;text-align:center;line-height:1.55;color:var(--cream);font-family:var(--serif)">' +
+        '<p style="color:var(--brass);font-family:var(--sans);letter-spacing:.18em;text-transform:uppercase;font-size:11px;margin:0 0 10px">Couldn’t load the viewer</p>' +
+        'The page-turn library didn’t load. Open <b>index.html</b> from inside the unzipped folder, with its <b>lib</b> and <b>pages</b> folders next to it — and ideally through a web server or GitHub Pages rather than as a bare file.' +
+        '</div>';
+    }
+    return;
+  }
+
+  // ---- Book data ---------------------------------------------------------
+  var TOTAL = 92;                     // leaves (single book pages)
+  var PAD = 3;                        // page-001.jpg
+  function src(n){ return "pages/page-" + String(n).padStart(PAD,"0") + ".jpg"; }
+  var IMAGES = [];
+  for (var i=1;i<=TOTAL;i++) IMAGES.push(src(i));
+
+  // Reliable leaf<->printed-page map: for the paired-spread range,
+  // leaf = printed_page - 4 (verified). Back matter pinned by inspection.
+  var CONTENTS = [
+    {t:"Front cover",           leaf:1,  pg:""},
+    {sec:"Chapters"},
+    {t:"1 · Hampton Court & Home Park", leaf:3,  pg:"7"},
+    {t:"2 · Origin & Formation of the Club", leaf:11, pg:"15"},
+    {t:"3 · Patience Rewarded",  leaf:33, pg:"37"},
+    {t:"4 · Miscellany",         leaf:42, pg:"46"},
+    {t:"5 · The Years of Change",leaf:47, pg:"51"},
+    {t:"6 · The Home Park Stags",leaf:53, pg:"57"},
+    {t:"7 · Years of Consolidation", leaf:55, pg:"59"},
+    {t:"8 · Golfers, Ungulates & Snippets", leaf:58, pg:"62"},
+    {t:"9 · 80 Years On",        leaf:60, pg:"64"},
+    {t:"10 · The Ladies' Section",leaf:64, pg:"68"},
+    {t:"11 · Conflagration & After", leaf:68, pg:"72"},
+    {t:"12 · Centenary Year",    leaf:81, pg:"85"},
+    {sec:"Records"},
+    {t:"Outstanding members & lists", leaf:84, pg:""},
+    {t:"List of Captains",       leaf:87, pg:""},
+    {t:"Cup competitions",       leaf:88, pg:""}
+  ];
+
+  // ---- DOM handles -------------------------------------------------------
+  var bookEl  = document.getElementById("book");
+  var curEl   = document.getElementById("cur");
+  var totalEl = document.getElementById("total");
+  var slider  = document.getElementById("slider");
+  var prev    = document.getElementById("prev");
+  var next    = document.getElementById("next");
+  var loading = document.getElementById("loading");
+
+  // ---- Build / rebuild the flipbook -------------------------------------
+  // StPageFlip reads `usePortrait` only at init, so to switch between the
+  // two-page book (desktop) and single-page reader (phones) we rebuild the
+  // instance when the layout breakpoint is crossed, preserving the leaf.
+  var PORTRAIT_MAX = 820;               // below this width -> single page
+  var RATIO = 1.4142;                   // page height / width (matches the scans)
+  var pageFlip = null;
+  var wantPortrait = window.innerWidth <= PORTRAIT_MAX;
+  var lastKey = "";
+
+  // Size the pages to fill the available space (big and readable). We compute
+  // explicit dimensions instead of relying on auto-stretch, which mis-measured
+  // the flex-centred container at startup and collapsed to a tiny book.
+  function computeSize(portrait){
+    var header = document.querySelector("header");
+    var footer = document.querySelector("footer");
+    var hH = header ? header.offsetHeight : 92;
+    var fH = footer ? footer.offsetHeight : 84;
+    var availH = Math.max(300, window.innerHeight - hH - fH - 30);
+    var availW = Math.min(window.innerWidth - 24, 2200);
+    var ph, pw;
+    if (portrait){                      // one page: fill height, then clamp width
+      ph = availH; pw = ph / RATIO;
+      if (pw > availW){ pw = availW; ph = pw * RATIO; }
+    } else {                            // two pages: fill height, then clamp to half width
+      ph = availH; pw = ph / RATIO;
+      if (pw * 2 > availW){ pw = availW / 2; ph = pw * RATIO; }
+    }
+    if (ph > 1500){ ph = 1500; pw = ph / RATIO; }   // soft cap on very large screens
+    return { w: Math.max(220, Math.round(pw)), h: Math.max(311, Math.round(ph)) };
+  }
+  function sizeKey(){
+    var p = window.innerWidth <= PORTRAIT_MAX;
+    var s = computeSize(p);
+    return p + ":" + s.w + "x" + s.h;
+  }
+
+  function makeFlip(portrait){
+    var el = document.createElement("div");
+    el.className = "flipbook";
+    el.id = "book";
+    bookEl.replaceWith(el);
+    bookEl = el;
+
+    var sz = computeSize(portrait);
+    var pf = new St.PageFlip(el, {
+      width: sz.w, height: sz.h,
+      size: "fixed",
+      maxShadowOpacity: 0.5,
+      showCover: true,
+      usePortrait: portrait,
+      mobileScrollSupport: false,
+      drawShadow: true,
+      flippingTime: 780,
+      useMouseEvents: true,
+      swipeDistance: 26,
+      clickEventForward: true
+    });
+    pf.loadFromImages(IMAGES);
+    pf.on("flip", refresh);
+    pf.on("changeOrientation", refresh);
+    window.__pf = pf;                    // exposed for debugging / power users
+    return pf;
+  }
+
+  function isPortrait(){
+    return pageFlip.getOrientation ? pageFlip.getOrientation() === "portrait" : wantPortrait;
+  }
+
+  // ---- Indicator + slider (spread-aware) --------------------------------
+  function refresh(){
+    if (!pageFlip) return;
+    var total = pageFlip.getPageCount();
+    var idx   = pageFlip.getCurrentPageIndex();      // 0-based; left leaf in spread mode
+    var left  = idx + 1;                             // 1-based left/only leaf
+    totalEl.textContent = total;
+
+    if (isPortrait()){
+      curEl.textContent = left;                      // exact leaf
+    } else {
+      var right = left + 1;
+      // cover (idx 0) and a lone final leaf show single; otherwise a range
+      curEl.textContent = (idx === 0 || right > total) ? String(left) : (left + "\u2013" + right);
+    }
+    slider.max = total;
+    slider.value = left;
+    slider.style.setProperty("--fill", ((left-1)/Math.max(1,total-1))*100 + "%");
+    prev.disabled = (left <= 1);
+    next.disabled = (left >= total);
+  }
+
+  function goTo(leaf){                                // leaf is 1-based
+    var idx = Math.min(Math.max(leaf,1), pageFlip.getPageCount()) - 1;
+    pageFlip.turnToPage(idx);
+    refresh();
+  }
+
+  // ---- Initial build -----------------------------------------------------
+  pageFlip = makeFlip(wantPortrait);
+  lastKey = sizeKey();
+  pageFlip.on("init", function(){
+    refresh();
+    loading.classList.add("gone");
+    setTimeout(function(){ loading.style.display = "none"; }, 450);
+  });
+
+  // Refit on resize (debounced): rebuild when the fitted size or orientation
+  // changes, keeping the reader on the same leaf. Images are cached, so the
+  // rebuild is quick.
+  var rzTimer = null;
+  window.addEventListener("resize", function(){
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(function(){
+      var key = sizeKey();
+      if (key !== lastKey){
+        lastKey = key;
+        wantPortrait = window.innerWidth <= PORTRAIT_MAX;
+        var keep = pageFlip.getCurrentPageIndex();
+        try { pageFlip.destroy(); } catch(e){}
+        pageFlip = makeFlip(wantPortrait);
+        pageFlip.on("init", function(){ pageFlip.turnToPage(keep); refresh(); });
+      }
+      if (levels[zi] > 1) applyZoom();
+    }, 250);
+  });
+
+  prev.addEventListener("click", function(){ pageFlip.flipPrev(); });
+  next.addEventListener("click", function(){ pageFlip.flipNext(); });
+
+  slider.addEventListener("input", function(){
+    this.style.setProperty("--fill", ((this.value-1)/Math.max(1,this.max-1))*100 + "%");
+    curEl.textContent = this.value;
+  });
+  slider.addEventListener("change", function(){ goTo(parseInt(this.value,10)); });
+
+  // ---- Contents menu -----------------------------------------------------
+  var sheet = document.getElementById("sheet");
+  var menu = document.getElementById("menu");
+  CONTENTS.forEach(function(item){
+    if (item.sec){ var h=document.createElement("h2"); h.textContent=item.sec; sheet.appendChild(h); return; }
+    var a=document.createElement("a"); a.href="#"; a.dataset.leaf=item.leaf;
+    a.innerHTML = '<span>'+item.t+'</span>' + (item.pg ? '<span class="pg">p.'+item.pg+'</span>' : '');
+    a.addEventListener("click", function(e){ e.preventDefault(); goTo(parseInt(this.dataset.leaf,10)); menu.open=false; });
+    sheet.appendChild(a);
+  });
+  document.addEventListener("click", function(e){ if(menu.open && !menu.contains(e.target)) menu.open=false; });
+
+  // ---- Zoom --------------------------------------------------------------
+  var stage = document.getElementById("stage");
+  var zoomwrap = document.getElementById("zoomwrap");
+  var zoomBtn = document.getElementById("zoom");
+  var levels = [1, 1.5, 2], zi = 0;
+  function applyZoom(){
+    var z = levels[zi];
+    zoomwrap.style.transform = "scale(" + z + ")";
+    stage.style.alignItems = z>1 ? "flex-start" : "center";
+    stage.style.justifyContent = z>1 ? "flex-start" : "center";
+    zoomBtn.querySelector(".icon").textContent = z>1 ? "⊖" : "⊕";
+    if (z>1){ stage.scrollLeft=(stage.scrollWidth-stage.clientWidth)/2; stage.scrollTop=(stage.scrollHeight-stage.clientHeight)/2; }
+  }
+  function cycleZoom(dir){
+    if (dir==="out") zi=Math.max(0,zi-1);
+    else if (dir==="in") zi=Math.min(levels.length-1,zi+1);
+    else zi=(zi+1)%levels.length;
+    applyZoom();
+  }
+  zoomBtn.addEventListener("click", function(){ cycleZoom(); });
+  bookEl.addEventListener("dblclick", function(){ cycleZoom(); });
+
+  // ---- Fullscreen --------------------------------------------------------
+  var fsBtn = document.getElementById("fs");
+  fsBtn.addEventListener("click", function(){
+    if (!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})().catch(function(){}); }
+    else { document.exitFullscreen(); }
+  });
+
+  // ---- About / disclaimer ------------------------------------------------
+  var aboutOverlay = document.getElementById("aboutOverlay");
+  var aboutBtn = document.getElementById("aboutBtn");
+  var aboutClose = document.getElementById("aboutClose");
+  function openAbout(){ aboutOverlay.hidden = false; aboutClose.focus(); }
+  function closeAbout(){ aboutOverlay.hidden = true; aboutBtn.focus(); }
+  aboutBtn.addEventListener("click", openAbout);
+  aboutClose.addEventListener("click", closeAbout);
+  aboutOverlay.addEventListener("click", function(e){ if(e.target === aboutOverlay) closeAbout(); });
+
+  // ---- Keyboard ----------------------------------------------------------
+  document.addEventListener("keydown", function(e){
+    if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if (!aboutOverlay.hidden){ if (e.key === "Escape") closeAbout(); return; }
+    switch(e.key){
+      case "ArrowLeft": case "PageUp":  pageFlip.flipPrev(); e.preventDefault(); break;
+      case "ArrowRight": case "PageDown": pageFlip.flipNext(); e.preventDefault(); break;
+      case "Home": goTo(1); e.preventDefault(); break;
+      case "End":  goTo(pageFlip.getPageCount()); e.preventDefault(); break;
+      case "+": case "=": cycleZoom("in"); break;
+      case "-": case "_": cycleZoom("out"); break;
+      case "f": case "F": fsBtn.click(); break;
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
