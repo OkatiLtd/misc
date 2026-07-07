@@ -270,7 +270,6 @@
 
     <button id="zoomOut" title="Zoom out (−)" disabled><span class="icon">⊖</span></button>
     <button id="zoomIn" title="Zoom in (+)"><span class="icon">⊕</span></button>
-    <button id="fs" title="Fullscreen (F)" class="hide-sm"><span class="icon">⤢</span></button>
   </div>
 
   <div class="subfoot">
@@ -542,13 +541,6 @@
   zoomInBtn.addEventListener("click", function(){ cycleZoom("in"); });
   stage.addEventListener("dblclick", function(){ zi = zi>0 ? 0 : 1; applyZoom(); });
 
-  // ---- Fullscreen --------------------------------------------------------
-  var fsBtn = document.getElementById("fs");
-  fsBtn.addEventListener("click", function(){
-    if (!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})().catch(function(){}); }
-    else { document.exitFullscreen(); }
-  });
-
   // ---- About / disclaimer ------------------------------------------------
   var aboutOverlay = document.getElementById("aboutOverlay");
   var aboutBtn = document.getElementById("aboutBtn");
@@ -570,7 +562,6 @@
       case "End":  goTo(pageFlip.getPageCount()); e.preventDefault(); break;
       case "+": case "=": cycleZoom("in"); break;
       case "-": case "_": cycleZoom("out"); break;
-      case "f": case "F": fsBtn.click(); break;
     }
   });
 
